@@ -49,17 +49,33 @@ X = [ones(m, 1) X];
 %                 initial_theta, options);
 %
 
+  %Note: I assume here that samples (X) and their corresdponding labels y are sorted by labels (y). 
+  %      For a training set that is sprted, this needs to be handled
+  
+  yx = [y,X];
+  sort(yx,1);
+  
+  sortedY = yx(:,1);
+  sortedX = yx(:,2:end);
+  
+  labels = unique(sortedY);
 
-  labels = unique(y);
-
-  labelsCount = size(y);
+  labelsCount = size(sortedY);
+  featureCount = size(sortedX,2);
+  prviousLabel = -1;
   for i = 1:labelsCount 
-    initial_theta = zeros(size(X),1);
-    currLabel = y(i);
-    currY = y == currLabel;
+    initial_theta = zeros(featureCount,1);
+    currLabel = sortedY(i);
+    currY = sortedY == currLabel;
     %plot(currY);
-    currThete = lrCostFunction(initial_theta, X, y, lambda)
-    all_theta(i:i,:) = currThete;
+    if prviousLabel ~= currLabel 
+      prviousLabel = currLabel;
+      % printf ('Training theta for label %d \n',currLabel);%just for debugging...
+      
+      currTheta = lrCostFunction(initial_theta, sortedX, currY, lambda);
+      all_theta(i:i,:) = currTheta;
+    end
+    
   end
 
 

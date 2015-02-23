@@ -41,10 +41,9 @@ grad = zeros(size(theta));
 pos = find(y==1);
 neg = find(y == 0);
 
-hx = (X' * theta)';
+hx = X * theta;
 sigmoidH = sigmoid(hx);
 
-aaa = sigmoidH(pos) ;
 costFor_FalsePositive = -log(sigmoidH(pos) );%make sure that only predictions of POSITIVE (y == 1) is taken in considerations
 
 
@@ -61,10 +60,11 @@ J= (1/m) * summedCost +parameterPenalizing ;
 %%-----------------Grad
 
 diff = sigmoidH - y;
-diffX = diff' *X;
+diffX = (diff' *X)';
+
 grad = (1/m) * diffX;
 % Add regulization (for all BUT grad(0)):
-grad(2:end) = grad(2:end) + (lambda/m)*theta(2:end)';
+grad(2:end) = grad(2:end) + (lambda/m)*theta(2:end);
 
 
 
