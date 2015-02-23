@@ -62,18 +62,25 @@ X = [ones(m, 1) X];
 
   labelsCount = size(sortedY);
   featureCount = size(sortedX,2);
+  
   prviousLabel = -1;
+  indexOfClass = 1;
   for i = 1:labelsCount 
     initial_theta = zeros(featureCount,1);
     currLabel = sortedY(i);
     currY = sortedY == currLabel;
     %plot(currY);
     if prviousLabel ~= currLabel 
-      prviousLabel = currLabel;
-      % printf ('Training theta for label %d \n',currLabel);%just for debugging...
+       prviousLabel = currLabel;
+       % printf ('Debugging: Training theta for label %s \n',num2str(currLabel));%just for debugging...
+       indexOfClass =indexOfClass +1; % We will now update wights for next class
+      %[J, grad] = lrCostFunction(initial_theta, sortedX, currY, lambda);      
+    
+       options = optimset('GradObj', 'on', 'MaxIter', 400);
+       [currTheta, cost] = fminunc(@(t)(lrCostFunction(t, X, y,lambda)), initial_theta, options);     
       
-      currTheta = lrCostFunction(initial_theta, sortedX, currY, lambda);
-      all_theta(i:i,:) = currTheta;
+       all_theta(indexOfClass,:) = currTheta';
+     
     end
     
   end
