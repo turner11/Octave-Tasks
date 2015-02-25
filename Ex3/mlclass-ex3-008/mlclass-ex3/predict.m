@@ -21,9 +21,21 @@ p = zeros(size(X, 1), 1);
 %       can use max(A, [], 2) to obtain the max for each row.
 %
 
+input1 =[ones(m, 1) X];
+%Get the out put of first layer (input of second layer)
+output1 = sigmoid(input1*Theta1');  
 
+input2 = [ones(m, 1) output1];
+%Get the out put of second layer (out put of the entire neural network)
+output2 = sigmoid(input2*Theta2');  
+%calculate the highest propability
 
+ [ max_value, max_index ]  = max(output2, [], 2); 
 
+ p =max_index;
+ 
+ %plot(p);
+ %stem(p);
 
 
 
