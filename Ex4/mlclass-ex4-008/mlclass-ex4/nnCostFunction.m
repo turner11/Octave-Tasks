@@ -62,58 +62,63 @@ Theta2_grad = zeros(size(Theta2));
 %               and Theta2_grad from Part 2.
 %
 
-
-input1 =[ones(m, 1) X];
-%Get the out put of first layer (input of second layer)
-output1 = sigmoid(input1*Theta1');  
-
-input2 = [ones(m, 1) output1];
-%Get the out put of second layer (out put of the entire neural network)
-output2 = sigmoid(input2*Theta2');  
-%calculate the highest propability
-
-[ max_value, max_index ]  = max(output2, [], 2); 
-p =max_index;
-
 %% Calculate cost --------------------------------------------------------------
-  labels = unique(y);
-  labelsCount = size(labels,1);
+  
   featureCount = size(X,2);   
   
   totalCost = 0;
-  for i = 1:m       
+  for i = 1:m 
+    currSample = X(i,:);% The sample for training the network in this pass
+    currLabel = y(i);%the label of current sample
    
-    currSample = X(i);
-    currLabel = y(i); %the label of current sample
+    input1 =[1  currSample];% Add the bias
+    %Get the out put of first layer (input of second layer)
+    output1 = sigmoid(input1*Theta1');  
+
+    input2 = [1 output1];% Add the bias
+    %Get the out put of second layer (out put of the entire neural network)
+    output2 = sigmoid(input2*Theta2');  
+    %calculate the highest propability
+
+    [ max_value, max_index ]  = max(output2, [], 2); 
+
+    prediction =max_index;
+
+    %% Vectorize results for the cost function
+    labels = unique(y);
+    labelsCount = size(labels,1);
     
-    pos = find(y==i);
-    neg = find(y ~= 0);
+    I = eye(labelsCount);
+    vectorizedP = I(:, prediction);
+    vectorizedY = I(:, currLabel);   
     
-    theta = [Theta1(:);Theta2(:)];
-    hx = currSample * theta;
-    sigmoidH = sigmoid(hx);
+    %% The actual cost calculation
+    pos = find(vectorizedP == vectorizedY); %indexes of labels that were marked as current network output
+    neg = find(vectorizedP ~= vectorizedY); %indexes of labels that were NOT marked as current network output
+    
+    
+    hx = vectorizedP;
+    %sigmoidH = sigmoid(hx);
 
-    costFor_FalsePositive = -log(sigmoidH(pos) );%make sure that only predictions of POSITIVE (y == 1) is taken in considerations
+    costFor_FalsePositive = -log(hx(pos) );%make sure that only predictions of POSITIVE (y == 1) is taken in considerations
 
 
-    costFor_FalseNegative = -log( 1- sigmoidH(neg) )  ;        %makes sure that only predictions of NEGITIVE (y == 0) is taken in considerations
-
+    costFor_FalseNegative = -log( 1- hx(neg) )  ; %makes sure that only predictions of NEGITIVE (y == 0) is taken in considerations
 
     %Note: I used indexes rather (y * ) or ([1-y]*) because inf * 0 results a NaN
+    currCost = sum(costFor_FalsePositive) + sum(costFor_FalseNegative);
 
-    summedCost = sum(costFor_FalsePositive) + sum(costFor_FalseNegative);
-
-    parameterPenalizing = (lambda/(2*m))* sum(theta(2:end).^2); %NOTE: theta(0) is not Penalized. It is the offset, typically 1...
-    currCost=  summedCost +parameterPenalizing ;
+    %parameterPenalizing = (lambda/(2*m))* sum(theta(2:end).^2); %NOTE: theta(0) is not Penalized. It is the offset, typically 1...
+    %currCost=  summedCost +parameterPenalizing ;
     totalCost  = totalCost  + currCost;
     %%-----------------Grad
 
-    diff = sigmoidH - y;
-    diffX = (diff' *X)';
+    %diff = sigmoidH - y;
+    %diffX = (diff' *X)';
 
-    grad = (1/m) * diffX;
+    %grad = (1/m) * diffX;
     % Add regulization (for all BUT grad(0)):
-    grad(2:end) = grad(2:end) + (lambda/m)*theta(2:end);
+    %grad(2:end) = grad(2:end) + (lambda/m)*theta(2:end);
 
 
 
