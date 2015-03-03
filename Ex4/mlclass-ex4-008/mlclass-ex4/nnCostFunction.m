@@ -66,7 +66,7 @@ Theta2_grad = zeros(size(Theta2));
   
   featureCount = size(X,2);   
   
-  totalCost = 0;
+  cost_total = 0;
   for i = 1:m 
     currSample = X(i,:);% The sample for training the network in this pass
     currLabel = y(i);%the label of current sample
@@ -89,13 +89,14 @@ Theta2_grad = zeros(size(Theta2));
     labelsCount = size(labels,1);
     
     I = eye(labelsCount);
-    vectorizedP = I(:, prediction);
-    vectorizedY = I(:, currLabel);   
+    vectorizedP = double(I(:, prediction));
+    vectorizedY = double(I(:, currLabel));   
     
     %% The actual cost calculation
-    pos = find(vectorizedP == vectorizedY); %indexes of labels that were marked as current network output
-    neg = find(vectorizedP ~= vectorizedY); %indexes of labels that were NOT marked as current network output
-    
+    %pos = find(vectorizedP == vectorizedY); %indexes of labels that were marked as current network output
+    %neg = find(vectorizedP ~= vectorizedY); %indexes of labels that were NOT marked as current network output
+    pos = find(vectorizedY==1)';
+    neg = find(vectorizedY == 0)';
     
     hx = vectorizedP;
     %sigmoidH = sigmoid(hx);
@@ -106,11 +107,11 @@ Theta2_grad = zeros(size(Theta2));
     costFor_FalseNegative = -log( 1- hx(neg) )  ; %makes sure that only predictions of NEGITIVE (y == 0) is taken in considerations
 
     %Note: I used indexes rather (y * ) or ([1-y]*) because inf * 0 results a NaN
-    currCost = sum(costFor_FalsePositive) + sum(costFor_FalseNegative);
+    cost_curr = sum(costFor_FalsePositive) + sum(costFor_FalseNegative);
 
     %parameterPenalizing = (lambda/(2*m))* sum(theta(2:end).^2); %NOTE: theta(0) is not Penalized. It is the offset, typically 1...
-    %currCost=  summedCost +parameterPenalizing ;
-    totalCost  = totalCost  + currCost;
+    %cost_curr=  summedCost +parameterPenalizing ;
+    cost_total  = cost_total  + cost_curr;
     %%-----------------Grad
 
     %diff = sigmoidH - y;
@@ -124,7 +125,7 @@ Theta2_grad = zeros(size(Theta2));
 
 
  end
- J= (1/m) *totalCost
+ J= (1/m) *cost_total
 
 
 
