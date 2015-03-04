@@ -67,19 +67,22 @@ Theta2_grad = zeros(size(Theta2));
   featureCount = size(X,2);   
   
   cost_total = 0;
-  delta = 0;
+  delta2 = 0;
+  delta3 = 0;
   for i = 1:m 
     currSample = X(i,:);% The sample for training the network in this pass
     currLabel = y(i);%the label of current sample
    
     input1 =[1  currSample];% Add the bias
     %Get the out put of first layer (input of second layer)
-    output1 = sigmoid(input1*Theta1');  
+    z2 = input1*Theta1';
+    output1 = sigmoid(z2);  %a2
    
     
     input2 = [1 output1];% Add the bias
     %Get the out put of second layer (out put of the entire neural network)
-    output2 = sigmoid(input2*Theta2');  
+    z3 = input2*Theta2';
+    output2 = sigmoid(z3); %a3
 
     %calculate the highest propability
 
@@ -116,11 +119,15 @@ Theta2_grad = zeros(size(Theta2));
     %cost_curr=  summedCost +parameterPenalizing ;
     cost_total  = cost_total  + cost_curr;
     %%-----------------Grad - backpropagation
+    error_diff = hx' - vectorizedY;         
+    error_diff_Layer2 = (Theta2' * error_diff) .* sigmoidGradient([1 z2])';
+    error_diff_Layer2 = error_diff_Layer2(2:end);%Remove unit resulted from theta's bias
     
-    error_diff = hx - vectorizedY;
-    error_diff_Layer2 = Theta2' * error_diff .* sigmoidGradient(input2);
-    error_diff_Layer2 = error_diff_Layer2(2:end);%Remove the bias unit
-    %delta = delta + 
+    %error_diff = error_diff(2:end);
+    
+    
+    delta3 = delta3 + output2*error_diff;
+    delta2 = delta2 + output1*error_diff_Layer1;
     %diffX = (diff' *X)';
 
     %grad = (1/m) * diffX;
@@ -131,7 +138,11 @@ Theta2_grad = zeros(size(Theta2));
 
 
  end
+ D3 = (1/m)*delta3 
+ D2 = (1/m)*delta2 ;
  
+ D3(:,2:end) = D(:,2:end) + lambda* nn_params;
+ D2(:,2:end) = D(:,2:end) + lambda* nn_params;
  %% Calculatae the regularization terms---------------------
  
  Theta1_ExcludingBias =Theta1(:,2:end);
