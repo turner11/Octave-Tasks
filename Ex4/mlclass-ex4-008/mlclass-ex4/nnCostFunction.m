@@ -118,16 +118,21 @@ Theta2_grad = zeros(size(Theta2));
     %parameterPenalizing = (lambda/(2*m))* sum(theta(2:end).^2); %NOTE: theta(0) is not Penalized. It is the offset, typically 1...
     %cost_curr=  summedCost +parameterPenalizing ;
     cost_total  = cost_total  + cost_curr;
-    %%-----------------Grad - backpropagation
-    a2 = input_layer2; %a2 as per definition in PPT
-    a3 = input_layer3; %a3 as per definition in PPT
     
-    error_diff_output_layer = hx' - vectorizedY;         
+    
+    %%===-----------------Grad - backpropagation
+    a2 = output_layer2;%input_layer2; %a2 as per definition in PPT
+    a3 = output_layer3;%input_layer3; %a3 as per definition in PPT
+    
+    %Errors in output layer
+    error_diff_output_layer = a3' - vectorizedY;
+    
+    %errors in hidden layer    
     error_diff_Layer2 = (Theta2' * error_diff_output_layer) .* sigmoidGradient([1 z2])';
-    error_diff_Layer2 = error_diff_Layer2(2:end);%Remove unit resulted from theta's bias
-       
+    error_diff_Layer2 = error_diff_Layer2(2:end);%Remove unit resulted from theta's bias   
     
-    d_mult_a_L3 = error_diff_output_layer *a3;
+    %Get delta matrices
+    d_mult_a_L3 = error_diff_output_layer *a3;    
     d_mult_a_L2 = error_diff_Layer2 * a2;
     
     delta3 = d_mult_a_L3;
@@ -145,7 +150,7 @@ Theta2_grad = zeros(size(Theta2));
  
  
  
- J= (1/m) *cost_total + (lambda/(2*m))*totalReg
+ J= (1/m) *cost_total + (lambda/(2*m))*totalReg;
 
 % -------------------------------------------------------------
 
