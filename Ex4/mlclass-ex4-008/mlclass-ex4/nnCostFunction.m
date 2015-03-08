@@ -64,29 +64,29 @@ Theta2_grad = zeros(size(Theta2));
 
 %% Calculate cost --------------------------------------------------------------
   
-  featureCount = size(X,2);   
+  %featureCount = size(X,2);   
   
   cost_total = 0;
-  delta2 = 0;
   delta3 = 0;
+  delta2 = 0;
   for i = 1:m 
     currSample = X(i,:);% The sample for training the network in this pass
     currLabel = y(i);%the label of current sample
    
-    input1 =[1  currSample];% Add the bias
+    input_layer2 =[1  currSample];% Add the bias
     %Get the out put of first layer (input of second layer)
-    z2 = input1*Theta1';
-    output1 = sigmoid(z2);  %a2
+    z2 = input_layer2*Theta1';
+    output_layer2 = sigmoid(z2);  %a2
    
     
-    input2 = [1 output1];% Add the bias
+    input_layer3 = [1 output_layer2];% Add the bias
     %Get the out put of second layer (out put of the entire neural network)
-    z3 = input2*Theta2';
-    output2 = sigmoid(z3); %a3
+    z3 = input_layer3*Theta2';
+    output_layer3 = sigmoid(z3); %a3
 
     %calculate the highest propability
 
-    [ max_value, max_index ]  = max(output2, [], 2); 
+    [ max_value, max_index ]  = max(output_layer3, [], 2); 
     prediction =max_index;
     
 
@@ -95,7 +95,7 @@ Theta2_grad = zeros(size(Theta2));
     labelsCount = size(labels,1);
        
     I = eye(labelsCount);
-    vectorizedP = double(I(:, prediction));%output2
+    vectorizedP = double(I(:, prediction));
     vectorizedY = double(I(:, currLabel));   
     
     
@@ -104,7 +104,7 @@ Theta2_grad = zeros(size(Theta2));
     pos = find(vectorizedY==1)';%indexes of labels that were marked as current network output
     neg = find(vectorizedY == 0)';%indexes of labels that were NOT marked as current network output
     
-    hx = output2;
+    hx = output_layer3;
     %sigmoidH = sigmoid(hx);
     hxPos = hx(pos);
     costFor_FalsePositive = -log(hxPos );%make sure that only predictions of POSITIVE (y == 1) is taken in considerations
@@ -119,30 +119,21 @@ Theta2_grad = zeros(size(Theta2));
     %cost_curr=  summedCost +parameterPenalizing ;
     cost_total  = cost_total  + cost_curr;
     %%-----------------Grad - backpropagation
-    error_diff = hx' - vectorizedY;         
-    error_diff_Layer2 = (Theta2' * error_diff) .* sigmoidGradient([1 z2])';
+    a2 = input_layer2; %a2 as per definition in PPT
+    a3 = input_layer3; %a3 as per definition in PPT
+    
+    error_diff_output_layer = hx' - vectorizedY;         
+    error_diff_Layer2 = (Theta2' * error_diff_output_layer) .* sigmoidGradient([1 z2])';
     error_diff_Layer2 = error_diff_Layer2(2:end);%Remove unit resulted from theta's bias
+       
     
-    %error_diff = error_diff(2:end);
+    d_mult_a_L3 = error_diff_output_layer *a3;
+    d_mult_a_L2 = error_diff_Layer2 * a2;
     
-    
-    delta3 = delta3 + output2*error_diff;
-    delta2 = delta2 + output1*error_diff_Layer1;
-    %diffX = (diff' *X)';
-
-    %grad = (1/m) * diffX;
-    % Add regulization (for all BUT grad(0)):
-    %grad(2:end) = grad(2:end) + (lambda/m)*theta(2:end);
-
-
-
-
+    delta3 = d_mult_a_L3;
+    delta2 = d_mult_a_L2;
  end
- D3 = (1/m)*delta3 
- D2 = (1/m)*delta2 ;
- 
- D3(:,2:end) = D(:,2:end) + lambda* nn_params;
- D2(:,2:end) = D(:,2:end) + lambda* nn_params;
+
  %% Calculatae the regularization terms---------------------
  
  Theta1_ExcludingBias =Theta1(:,2:end);
@@ -156,18 +147,20 @@ Theta2_grad = zeros(size(Theta2));
  
  J= (1/m) *cost_total + (lambda/(2*m))*totalReg
 
-
-
-
-
-
-
-
 % -------------------------------------------------------------
 
 % =========================================================================
 
 % Unroll gradients
+
+ D3 = (1/m)*delta3 ;
+ D2 = (1/m)*delta2 ;
+ 
+%D3 = D3(:,2:end) + lambda* nn_params;
+%D2 = D2(:,2:end) + lambda* nn_params;
+
+Theta1_grad = D2;
+Theta2_grad = D3;
 
 grad = [Theta1_grad(:) ; Theta2_grad(:)];
 
