@@ -67,7 +67,8 @@ Theta2_grad = zeros(size(Theta2));
   %featureCount = size(X,2);   
   
   cost_total = 0;
-  delta = 0;
+  delta3 = 0;
+  delta2 = 0;
   for i = 1:m 
     currSample = X(i,:);% The sample for training the network in this pass
     currLabel = y(i);%the label of current sample
@@ -121,22 +122,21 @@ Theta2_grad = zeros(size(Theta2));
     
     %%===-----------------Grad - backpropagation
     a2 = output_layer2;%input_layer2; %a2 as per definition in PPT
-    a3 = output_layer3;%input_layer3; %a3 as per definition in PPT   
-  
+    a3 = output_layer3;%input_layer3; %a3 as per definition in PPT
     
     %Errors in output layer
     error_diff_output_layer = a3' - vectorizedY;
     
-    %errors in hidden layer        
+    %errors in hidden layer    
     error_diff_Layer2 = (Theta2' * error_diff_output_layer) .* sigmoidGradient([1 z2])';
     error_diff_Layer2 = error_diff_Layer2(2:end);%Remove unit resulted from theta's bias   
     
     %Get delta matrices
-    deltas =[error_diff_Layer2 error_diff_output_layer];
-    At = [a2 a3]';
+    d_mult_a_L3 = error_diff_output_layer *a3;    
+    d_mult_a_L2 = error_diff_Layer2 * a2;
     
-    currDelta = deltas*At;   
-    delta = delta +currDelta ;
+    delta3 = d_mult_a_L3;
+    delta2 = d_mult_a_L2;
  end
 
  %% Calculatae the regularization terms---------------------
@@ -157,13 +157,15 @@ Theta2_grad = zeros(size(Theta2));
 % =========================================================================
 
 % Unroll gradients
- delta = (1/m)*delta ;
+
+ D3 = (1/m)*delta3 ;
+ D2 = (1/m)*delta2 ;
  
 %D3 = D3(:,2:end) + lambda* nn_params;
 %D2 = D2(:,2:end) + lambda* nn_params;
 
-Theta1_grad = delta(1,:);
-Theta2_grad = delta(2,:);
+Theta1_grad = D2;
+Theta2_grad = D3;
 
 grad = [Theta1_grad(:) ; Theta2_grad(:)];
 
