@@ -66,8 +66,15 @@ Theta2_grad = zeros(size(Theta2));
   
   %featureCount = size(X,2);   
   
+   %% Varaiables that will be used in all itterations. ===========
+  labels = unique(y);
+  labelsCount = size(labels,1);
+   %%==================================================
+  I = eye(labelsCount);
+    
+    
   cost_total = 0;
-  delta3 = 0;
+  delta1 = 0;
   delta2 = 0;
   for i = 1:m 
     currSample = X(i,:);% The sample for training the network in this pass
@@ -90,11 +97,7 @@ Theta2_grad = zeros(size(Theta2));
     prediction =max_index;
     
 
-    %% Vectorize results for the cost function
-    labels = unique(y);
-    labelsCount = size(labels,1);
-       
-    I = eye(labelsCount);
+    %% Vectorize results for the cost function===========
     vectorizedP = double(I(:, prediction));
     vectorizedY = double(I(:, currLabel));   
     
@@ -119,7 +122,8 @@ Theta2_grad = zeros(size(Theta2));
     %cost_curr=  summedCost +parameterPenalizing ;
     cost_total  = cost_total  + cost_curr;
     
-    
+    %clear pos; clear neg; clear hx; clear hxPos; clear costFor_FalsePositive;
+    %clear hxNeg; clear hxNeg; clear costFor_FalseNegative; clear cost_curr; 
     %%===-----------------Grad - backpropagation
     a2 = output_layer2;%input_layer2; %a2 as per definition in PPT
     a3 = output_layer3;%input_layer3; %a3 as per definition in PPT
@@ -131,12 +135,12 @@ Theta2_grad = zeros(size(Theta2));
     error_diff_Layer2 = (Theta2' * error_diff_output_layer) .* sigmoidGradient([1 z2])';
     error_diff_Layer2 = error_diff_Layer2(2:end);%Remove unit resulted from theta's bias   
     
-    %Get delta matrices
-    d_mult_a_L3 = error_diff_output_layer *a3;    
-    d_mult_a_L2 = error_diff_Layer2 * a2;
+    %Get delta matrices    
+    d_mult_a_L1 = error_diff_Layer2 * input_layer2;         %26X1 * 1X25 Expected 25X401
+    d_mult_a_L2= error_diff_output_layer *input_layer3;    %10X1 * 1X10 Expected 10X26
     
-    delta3 = d_mult_a_L3;
-    delta2 = d_mult_a_L2;
+    delta1 = delta1 + d_mult_a_L1;
+    delta2 = delta2 + d_mult_a_L2;
  end
 
  %% Calculatae the regularization terms---------------------
@@ -158,14 +162,14 @@ Theta2_grad = zeros(size(Theta2));
 
 % Unroll gradients
 
- D3 = (1/m)*delta3 ;
+ D1 = (1/m)*delta1 ;
  D2 = (1/m)*delta2 ;
- 
-%D3 = D3(:,2:end) + lambda* nn_params;
-%D2 = D2(:,2:end) + lambda* nn_params;
+ %regularization for non biased terms
+D1(:,2:end) = D1(:,2:end) + (lambda/m)* Theta1(:,2:end); 
+D2(:,2:end) = D2(:,2:end) + (lambda/m)* Theta2(:,2:end);
 
-Theta1_grad = D2;
-Theta2_grad = D3;
+Theta1_grad = D1;
+Theta2_grad = D2;
 
 grad = [Theta1_grad(:) ; Theta2_grad(:)];
 
