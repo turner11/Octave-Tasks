@@ -20,7 +20,8 @@ S = zeros(n);
 %       number of examples).
 %
 
-
+covMat = (1/m)*X'*X;
+[U, S, V] = svd(covMat );
 
 
 
