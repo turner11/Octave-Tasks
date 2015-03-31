@@ -40,9 +40,6 @@ Theta_grad = zeros(size(Theta));
 %                     partial derivatives w.r.t. to each element of Theta
 %
 
-
-
-
 ratedIndices = find(R == 1);
 predictedRatings = X*Theta';
 predictedRatings  = predictedRatings (ratedIndices);
@@ -53,7 +50,21 @@ errors = errors.^2;
 cost = sum(errors);
 
 J= (1/2)*cost;
+
 % =============================================================
+
+perdictedTheta = Theta(ratedIndices);
+temp = errors * perdictedTheta' ;
+X_grad =sum(temp);
+
+
+perdictedX = X(ratedIndices);
+temp = errors * perdictedX' ;
+Theta_grad =sum(temp);
+
+
+
+% -------------------------------------------------------------
 
 grad = [X_grad(:); Theta_grad(:)];
 
