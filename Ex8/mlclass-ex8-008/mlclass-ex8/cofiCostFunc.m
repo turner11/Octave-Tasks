@@ -43,18 +43,47 @@ Theta_grad = zeros(size(Theta));
 
 
 
+ratedIndices = find(R == 1);
+predictedRatings = X*Theta';
+predictedRatings  = predictedRatings (ratedIndices);
 
+ratedLabels = Y(ratedIndices);
+errors = predictedRatings  - ratedLabels ;
+errors = errors.^2;
+cost = sum(errors);
 
+cost = 0;
 
+for i = 1:num_movies
+  for j = 1: num_users
+    isRated = R(i,j) ==1;
+     if(isRated)
+     currError = errors(i*j);
+     cost = cost + currError;
+     end
+  end
+end  
 
+cost = 0;
+for i = 1:num_movies
+  for j = 1: num_users
+    
+     isRated = R(i,j) ==1;
+     if(isRated)
+      userTheta = Theta(j,:);
+      movieFeatures = X(i,:);
+      
+      userActualRanking = Y(i, j);
+      
+      currCost = (userTheta*movieFeatures'- userActualRanking)^2 ;
+      cost = cost + currCost;
+     end
+  
+  end
 
+end
 
-
-
-
-
-
-
+J= (1/2)*cost;
 % =============================================================
 
 grad = [X_grad(:); Theta_grad(:)];
