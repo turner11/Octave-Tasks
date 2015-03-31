@@ -23,34 +23,9 @@ sigma2 = zeros(n, 1);
 
 mu  = mean(X);
 
-
-featuresSums = sum(X);
-sumsMinusAvg_2 = (featuresSums   - mu).^2;
-sigma2 = 1/m * sumsMinusAvg_2 ;
-
-sumF = zeros(n, 1)';
-
-for i =1: m
-  currX = X(i,:);
-  sumF = sumF + currX ;
-  
-end
-
-mu2 = 1/m * sumF ;
-
-sumD = zeros(n, 1)';
-for i = 1: m
-  currX = X(i,:);
-  currD = (currX - mu2).^2;
-  sumD = sumD + currD; 
-  
-end
-
-sigma22 = 1/m * sumD ;
-
-aaa_sd  = max(max(sigma2 - sigma22));
-aaaa = 3;
-
+XminusAvg_2 = (X .- mu).^2;
+sumXminusAvg_2 = sum(XminusAvg_2);
+sigma2 = 1/m * sumXminusAvg_2 ;
 
 
 % =============================================================
